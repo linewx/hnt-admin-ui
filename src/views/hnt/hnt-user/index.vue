@@ -78,6 +78,7 @@
         <el-table v-loading="loading" :data="hntUserList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" align="center"/>
           <el-table-column label="用户名" align="center" prop="username" :show-overflow-tooltip="true"/>
+          <el-table-column label="租户ID" align="center" prop="tenantId" :show-overflow-tooltip="true"/>
           <el-table-column label="邮件" align="center" prop="email" :show-overflow-tooltip="true"/>
           <el-table-column label="电话号码" align="center" prop="mobile" :show-overflow-tooltip="true"/>
           <el-table-column label="状态" width="80" sortable="custom">
