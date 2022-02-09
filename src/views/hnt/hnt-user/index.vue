@@ -15,6 +15,8 @@
             <el-input v-model="queryParams.mobile" placeholder="请输入电话号码" clearable
                       size="small" @keyup.enter.native="handleQuery"/>
           </el-form-item>
+
+
           <el-form-item label="状态" prop="status">
             <el-select
               v-model="queryParams.status"
@@ -148,6 +150,28 @@
               <el-input v-model="form.mobile" placeholder="电话号码"
               />
             </el-form-item>
+            <el-form-item label="数据库连接">
+              <el-select v-model="form.connectionId" placeholder="请选择" @change="$forceUpdate()">
+                <el-option
+                  v-for="item in hntConnectionOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                  :disabled="item.status == 1"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="报告">
+              <el-select v-model="form.reportId" placeholder="请选择" @change="$forceUpdate()">
+                <el-option
+                  v-for="item in hntReportOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                  :disabled="item.status == 1"
+                />
+              </el-select>
+            </el-form-item>
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
                 <el-radio
@@ -170,7 +194,9 @@
 </template>
 
 <script>
-import { addHntUser, delHntUser, getHntUser, listHntUser, updateHntUser, changeHntUserStatus } from '@/api/hnt/hnt-user'
+import {addHntUser, delHntUser, getHntUser, listHntUser, updateHntUser, changeHntUserStatus} from '@/api/hnt/hnt-user'
+import {listHntConnection} from '@/api/hnt/hnt-connection';
+import {listHntReport} from '@/api/hnt/hnt-report';
 
 export default {
   name: 'HntUser',
@@ -193,6 +219,9 @@ export default {
       open: false,
       isEdit: false,
       // 状态数据字典
+      // HNT用户列表
+      hntReportOptions: [],
+      hntConnectionOptions: [],
       statusOptions: [],
       // 类型数据字典
       typeOptions: [],
@@ -214,10 +243,12 @@ export default {
       form: {},
       // 表单校验
       rules: {
-        username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
-        email: [{ required: true, message: '邮件不能为空', trigger: 'blur' }],
-        mobile: [{ required: true, message: '电话号码不能为空', trigger: 'blur' }],
-        status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
+        username: [{required: true, message: '用户名不能为空', trigger: 'blur'}],
+        email: [{required: true, message: '邮件不能为空', trigger: 'blur'}],
+        mobile: [{required: true, message: '电话号码不能为空', trigger: 'blur'}],
+        status: [{required: true, message: '状态不能为空', trigger: 'blur'}],
+        connectionId: [{required: true, message: '数据库连接不能为空', trigger: 'blur'}],
+        reportId: [{required: true, message: '报告不能为空', trigger: 'blur'}]
       }
     }
   },
@@ -225,6 +256,14 @@ export default {
     this.getList()
     this.getDicts('sys_normal_disable').then(response => {
       this.statusOptions = response.data
+    })
+
+    listHntConnection({pageSize: 1000}).then(response => {
+      this.hntConnectionOptions = response.data.list
+    })
+
+    listHntReport({pageSize: 1000}).then(response => {
+      this.hntReportOptions = response.data.list
     })
   },
   methods: {
@@ -237,6 +276,26 @@ export default {
           this.loading = false
         }
       )
+    },
+    reportFormat(row, column) {
+      // alert(JSON.stringify(this.hntUserOptions))
+      // alert(JSON.stringify(row.userId))
+      for (const oneReport of this.hntReportOptions) {
+        if (oneReport.id === row.reportId) {
+          return oneReport.name
+        }
+      }
+      return ''
+    },
+    connectionFormat(row, column) {
+      // alert(JSON.stringify(this.hntUserOptions))
+      // alert(JSON.stringify(row.userId))
+      for (const oneConnection of this.hntConnectionOptions) {
+        if (oneConnection.id === row.conectionId) {
+          return oneConnection.name
+        }
+      }
+      return ''
     },
     // 取消按钮
     cancel() {
@@ -255,10 +314,10 @@ export default {
       }
       this.resetForm('form')
     },
-    getImgList: function() {
+    getImgList: function () {
       this.form[this.fileIndex] = this.$refs['fileChoose'].resultList[0].fullUrl
     },
-    fileClose: function() {
+    fileClose: function () {
       this.fileOpen = false
     },
     // 关系
@@ -280,6 +339,14 @@ export default {
       this.open = true
       this.title = '添加HNT用户管理'
       this.isEdit = false
+
+      listHntConnection({pageSize: 1000}).then(response => {
+        this.hntConnectionOptions = response.data.list
+      })
+
+      listHntReport({pageSize: 1000}).then(response => {
+        this.hntReportOptions = response.data.list
+      })
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
@@ -298,6 +365,15 @@ export default {
         this.title = '修改HNT用户管理'
         this.isEdit = true
       })
+
+      listHntConnection({pageSize: 1000}).then(response => {
+        this.hntConnectionOptions = response.data.list
+      })
+
+      listHntReport({pageSize: 1000}).then(response => {
+        this.hntReportOptions = response.data.list
+      })
+
     },
     // 用户状态修改
     handleStatusChange(row) {
@@ -306,16 +382,16 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(function() {
+      }).then(function () {
         return changeHntUserStatus(row)
       }).then(() => {
         this.msgSuccess(text + '成功')
-      }).catch(function() {
+      }).catch(function () {
         row.status = row.status === '2' ? '1' : '2'
       })
     },
     /** 提交按钮 */
-    submitForm: function() {
+    submitForm: function () {
       this.$refs['form'].validate(valid => {
         if (valid) {
           if (this.form.id !== undefined) {
@@ -350,8 +426,8 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(function() {
-        return delHntUser({ 'ids': Ids })
+      }).then(function () {
+        return delHntUser({'ids': Ids})
       }).then((response) => {
         if (response.code === 200) {
           this.msgSuccess(response.msg)
@@ -360,7 +436,7 @@ export default {
         } else {
           this.msgError(response.msg)
         }
-      }).catch(function() {
+      }).catch(function () {
       })
     }
   }

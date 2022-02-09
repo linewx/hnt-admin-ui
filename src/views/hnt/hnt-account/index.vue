@@ -137,9 +137,9 @@
 </template>
 
 <script>
-import { addHntAccount, delHntAccount, getHntAccount, listHntAccount, updateHntAccount } from '@/api/hnt/hnt-account'
-import { listRole } from '@/api/admin/sys-role'
-import { listHntUser } from '@/api/hnt/hnt-user'
+import {addHntAccount, delHntAccount, getHntAccount, listHntAccount, updateHntAccount} from '@/api/hnt/hnt-account'
+import {listRole} from '@/api/admin/sys-role'
+import {listHntUser} from '@/api/hnt/hnt-user'
 
 export default {
   name: 'HntAccount',
@@ -182,14 +182,14 @@ export default {
       // 表单校验
       rules: {
         // name: [{ required: true, message: '账户名不能为空', trigger: 'blur' }],
-        addr: [{ required: true, message: '账户地址不能为空', trigger: 'blur' }],
-        userId: [{ required: true, message: '账户地址不能为空', trigger: 'blur' }]
+        addr: [{required: true, message: '账户地址不能为空', trigger: 'blur'}],
+        userId: [{required: true, message: '用户不能为空', trigger: 'blur'}]
       }
     }
   },
   created() {
     this.getList()
-    listHntUser({ pageSize: 1000 }).then(response => {
+    listHntUser({pageSize: 1000}).then(response => {
       this.hntUserOptions = response.data.list
     })
   },
@@ -229,10 +229,10 @@ export default {
       }
       this.resetForm('form')
     },
-    getImgList: function() {
+    getImgList: function () {
       this.form[this.fileIndex] = this.$refs['fileChoose'].resultList[0].fullUrl
     },
-    fileClose: function() {
+    fileClose: function () {
       this.fileOpen = false
     },
     // 关系
@@ -255,7 +255,7 @@ export default {
       this.title = '添加hnt账户管理'
       this.isEdit = false
 
-      listHntUser({ pageSize: 1000 }).then(response => {
+      listHntUser({pageSize: 1000}).then(response => {
         this.hntUserOptions = response.data.list
       })
     },
@@ -277,12 +277,12 @@ export default {
         this.isEdit = true
       })
 
-      listHntUser({ pageSize: 1000 }).then(response => {
+      listHntUser({pageSize: 1000}).then(response => {
         this.hntUserOptions = response.data.list
       })
     },
     /** 提交按钮 */
-    submitForm: function() {
+    submitForm: function () {
       this.$refs['form'].validate(valid => {
         if (valid) {
           if (this.form.id !== undefined) {
@@ -317,8 +317,8 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(function() {
-        return delHntAccount({ 'ids': Ids })
+      }).then(function () {
+        return delHntAccount({'ids': Ids})
       }).then((response) => {
         if (response.code === 200) {
           this.msgSuccess(response.msg)
@@ -327,7 +327,7 @@ export default {
         } else {
           this.msgError(response.msg)
         }
-      }).catch(function() {
+      }).catch(function () {
       })
     }
   }
